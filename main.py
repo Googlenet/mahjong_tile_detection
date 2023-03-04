@@ -39,8 +39,8 @@ gray_transform = transforms.Compose([
 ])
 
 # 1. Load and transform data
-train_dir = 'tiles/train'
-test_dir = 'tiles/test'
+train_dir = 'tiles_old/train'
+test_dir = 'tiles_old/test'
 
 train_data_aug = datasets.ImageFolder(root=train_dir, transform=trivial_transform)
 train_data_simple = datasets.ImageFolder(root=train_dir, transform=simple_transform)
@@ -70,106 +70,12 @@ test_dataloader_simple = DataLoader(test_data_simple,
                                     shuffle=False)
 
 # print(train_dataloader_simple, test_dataloader_simple)
-"""
-class TinyVGG(nn.Module):
-    
-    # Model architecture copying TinyVGG from:
-    # https://poloclub.github.io/cnn-explainer/
-    
 
-    def __init__(self, input_shape: int, hidden_units: int, output_shape: int) -> None:
-        super().__init__()
-        self.conv_block_1 = nn.Sequential(
-            nn.Conv2d(in_channels=input_shape,
-                      out_channels=hidden_units,
-                      kernel_size=3,  # how big is the square that's going over the image?
-                      stride=1,  # default
-                      padding=0),
-            # options = "valid" (no padding) or "same" (output has same shape as input) or int for specific number
-            nn.ReLU(),
-            nn.Conv2d(in_channels=hidden_units,
-                      out_channels=hidden_units,
-                      kernel_size=3,
-                      stride=1,
-                      padding=0),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2,
-                         stride=2)  # default stride value is same as kernel_size
-        )
-        self.conv_block_2 = nn.Sequential(
-            nn.Conv2d(hidden_units, hidden_units, kernel_size=3, stride=1, padding=0),
-            nn.ReLU(),
-            nn.Conv2d(hidden_units, hidden_units, kernel_size=3, stride=1, padding=0),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            # Where did this in_features shape come from?
-            # It's because each layer of our network compresses and changes the shape of our inputs data.
-            nn.Linear(in_features=hidden_units * 29 * 29,
-                      out_features=output_shape)
-        )
-
-    def forward(self, x: torch.Tensor):
-        x = self.conv_block_1(x)
-        # print(x.shape)
-        x = self.conv_block_2(x)
-        # print(x.shape)
-        x = self.classifier(x)
-        # print(x.shape)
-        return x
-        # return self.classifier(self.conv_block_2(self.conv_block_1(x))) # <- leverage the benefits of operator fusion
-"""
-class Custom(nn.Module):
-    """
-    Model architecture copying TinyVGG from:
-    https://poloclub.github.io/cnn-explainer/
-    """
-
-    def __init__(self, input_shape: int, hidden_units: int, output_shape: int):
-        super().__init__()
-        self.conv_block_1 = nn.Sequential(
-            nn.Conv2d(in_channels=input_shape,
-                      out_channels=hidden_units,
-                      kernel_size=3,  # how big is the square that's going over the image?
-                      stride=1,  # default
-                      padding=0),
-            # options = "valid" (no padding) or "same" (output has same shape as input) or int for specific number
-            nn.ReLU(),
-            # nn.Conv2d(hidden_units, hidden_units, kernel_size=3, stride=1, padding=0),
-            # nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2,
-                         stride=2)  # default stride value is same as kernel_size
-        )
-        self.conv_block_2 = nn.Sequential(
-            nn.Conv2d(hidden_units, hidden_units, kernel_size=3, stride=1, padding=0),
-            nn.ReLU(),
-            # nn.Conv2d(hidden_units, hidden_units, kernel_size=3, stride=1, padding=0),
-            # nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            # Where did this in_features shape come from?
-            # It's because each layer of our network compresses and changes the shape of our inputs data.
-            nn.Linear(in_features=hidden_units * 30 * 30,
-                      out_features=output_shape)
-        )
-
-    def forward(self, x: torch.Tensor):
-        x = self.conv_block_1(x)
-        # print(x.shape)
-        x = self.conv_block_2(x)
-        # print(x.shape)
-        x = self.classifier(x)
-        # print(x.shape)
-        return x
-        # return self.classifier(self.conv_block_2(self.conv_block_1(x))) # <- leverage the benefits of operator fusion
+from tile_cnn import tile_cnn
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 #torch.manual_seed(42)
-model_0 = Custom(input_shape=3,  # number of color channels (3 for RGB)
+model_0 = tile_cnn(input_shape=3,  # number of color channels (3 for RGB)
                   hidden_units=3,
                   output_shape=len(test_data_simple.classes)).to(device)
 
@@ -298,7 +204,7 @@ def train(model: torch.nn.Module,
 #torch.cuda.manual_seed(42)
 
 # Set number of epochs
-NUM_EPOCHS = 10
+NUM_EPOCHS = 1
 
 # Setup loss function and optimizer
 loss_fn = nn.CrossEntropyLoss()
@@ -380,7 +286,7 @@ def pred_and_plot_image(model: torch.nn.Module,
     plt.axis(False)
     plt.show()
 
-custom_image_path = 'tiles/test/flower_3/IMG_20230226_194738153.jpg'
+custom_image_path = 'tiles_old/test/flower_3/IMG_20230226_194738153.jpg'
 class_names = test_data_simple.classes
 custom_image_transform = transforms.Compose([
     transforms.Resize((128, 128))
