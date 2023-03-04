@@ -1,17 +1,23 @@
 from torchvision import transforms
 
 # transform that resizes to size (length, width)
-def simple_transform(length, width):
-    transforms.Compose([
-    transforms.Resize((length, width)),
-    transforms.ToTensor()
-    ])
+def size_transform_tensor(length, width):
+    return transforms.Compose([
+                transforms.Resize((length, width)),
+                transforms.ToTensor()
+           ])
 
-trivial_transform = transforms.Compose([
+def size_transform(length, width):
+    return transforms.Compose([
+                transforms.Resize((length, width)),
+           ])
+
+def trivial_transform():
+    trivial_transform = transforms.Compose([
     transforms.Resize((128, 128)),
     transforms.TrivialAugmentWide(num_magnitude_bins=31),
     transforms.ToTensor()
-])
+    ])
 
 rot_transform = transforms.Compose([
     transforms.Resize((128, 128)),
