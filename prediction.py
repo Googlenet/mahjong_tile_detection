@@ -3,7 +3,7 @@ import torchvision
 from tile_cnn import tile_cnn
 import matplotlib.pyplot as plt
 from typing import List
-from torchvision import transforms, datasets
+from torchvision import datasets
 import transforms
 from pathlib import Path
 
@@ -59,7 +59,7 @@ def pred_and_plot_image(model: torch.nn.Module,
 
 test_dir = 'tiles/test'
 test_data_simple = datasets.ImageFolder(root=test_dir,
-                                        transform=transforms.simple_transform(128, 128))
+                                        transform=transforms.size_transform(128, 128))
 
 loaded_model = tile_cnn(input_shape=3,  # number of color channels (3 for RGB)
                   hidden_units=3,
@@ -68,13 +68,13 @@ loaded_model = tile_cnn(input_shape=3,  # number of color channels (3 for RGB)
 
 # Load in the saved state_dict()
 MODEL_PATH = Path("models")
-MODEL_NAME = "ver7_model.pth"
+MODEL_NAME = "ver10_model.pth"
 MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
 loaded_model.load_state_dict(torch.load(f=MODEL_SAVE_PATH))
 
 
-custom_image_path = 'tiles/test/flower_3/IMG_20230226_194738153.jpg'
+custom_image_path = 'tiles/test/char/IMG_20230226_175100856.jpg'
 class_names = test_data_simple.classes
 
 # Pred on our custom image

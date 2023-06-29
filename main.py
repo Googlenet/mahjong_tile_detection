@@ -1,7 +1,7 @@
 from typing import List
 import matplotlib.pyplot as plt
 import torchvision
-from torchvision import transforms
+# from torchvision import transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
 from torch import nn
@@ -13,40 +13,23 @@ from torchmetrics import ConfusionMatrix
 from mlxtend.plotting import plot_confusion_matrix
 import numpy as np
 from pathlib import Path
-
-
-# Create simple transform
-simple_transform = transforms.Compose([
-    transforms.Resize((128, 128)),
-    transforms.ToTensor()
-])
-
-trivial_transform = transforms.Compose([
-    transforms.Resize((128, 128)),
-    transforms.TrivialAugmentWide(num_magnitude_bins=31),
-    transforms.ToTensor()
-])
-
-rot_transform = transforms.Compose([
-    transforms.Resize((128, 128)),
-    transforms.RandomRotation(degrees=30),
-    transforms.ToTensor()
-])
-
-gray_transform = transforms.Compose([
-    transforms.Resize((128, 128)),
-    transforms.Grayscale(3),
-    transforms.ToTensor()
-])
+import transforms
 
 # 1. Load and transform data
 train_dir = 'tiles/train'
 test_dir = 'tiles/test'
 
-train_data_aug = datasets.ImageFolder(root=train_dir, transform=trivial_transform)
-train_data_simple = datasets.ImageFolder(root=train_dir, transform=simple_transform)
-train_data_gray = datasets.ImageFolder(root=train_dir, transform=gray_transform)
-train_data_rot = datasets.ImageFolder(root=train_dir, transform=rot_transform)
+img_width = 128
+img_height = 128
+
+train_data_aug = datasets.ImageFolder(root=train_dir,
+                                      transform=transforms.trivial_transform_tensor(img_width, img_height))
+train_data_simple = datasets.ImageFolder(root=train_dir,
+                                         transform=transforms.size_transform_tensor(img_width, img_height))
+train_data_gray = datasets.ImageFolder(root=train_dir,
+                                       transform=transforms.gray_transform_tensor(img_width, img_height))
+train_data_rot = datasets.ImageFolder(root=train_dir,
+                                      transform=transforms.rot_transform_tensor(img_width, img_height))
 
 #train_data_crop = datasets.ImageFolder(root=train_dir, transform=crop_transform)
 
@@ -54,7 +37,8 @@ train_data = torch.utils.data.ConcatDataset([train_data_aug, train_data_simple,
                                              train_data_gray, train_data_rot])
 
 
-test_data_simple = datasets.ImageFolder(root=test_dir, transform=simple_transform)
+test_data_simple = datasets.ImageFolder(root=test_dir,
+                                        transform=transforms.size_transform_tensor(img_width, img_height))
 
 # 2. Turn data into DataLoaders
 # Setup batch size and number of workers
@@ -205,7 +189,7 @@ def train(model: torch.nn.Module,
 #torch.cuda.manual_seed(42)
 
 # Set number of epochs
-NUM_EPOCHS = 1
+NUM_EPOCHS = 10
 
 # Setup loss function and optimizer
 loss_fn = nn.CrossEntropyLoss()
@@ -232,7 +216,7 @@ functions.plot_loss_curves(model_0_results).show()
 
 # Create model save path ------------------------------------------------
 MODEL_PATH = Path("models")
-MODEL_NAME = "ver7_model.pth"
+MODEL_NAME = "ver10_model.pth"
 MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
 # Save the model state dict
