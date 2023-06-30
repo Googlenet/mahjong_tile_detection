@@ -13,3 +13,7 @@ models as of currently aren't very good (~3% test accuracy).
 \\
 6/28/2023:
 Most recent model ver10 has an increased accuracy of ~30%
+
+# How to use:
+Navigate to file prediction.py and change the model number of line 71 to your liking,
+then replace the image file on line 77 to one of your choice, then run. 
